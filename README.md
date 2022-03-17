@@ -157,5 +157,43 @@ Part of the code is adopted from previous works: [PSMNet](https://github.com/Jia
 
 
 
+## Update 2022 (Andrew) - to use CUDA 11.3
+### How to run the prediction on the pretrainded model (Windows 11)
+
+```
+conda create --namea anetEnv2
+cd C:\Deep\aanet
+
+conda install  pytorch=1.10.2=py3.7_cuda11.3_cudnn8_0 cudatoolkit=11.3 -c pytorch
+pip install scikit-image
+pip install pillow==6.1.0
+conda install torchvision
+
+cd nets/deform_conv
+```
+https://github.com/pytorch/pytorch/issues/28472#issuecomment-545425721
+replace all the occurences of AT_CHECK with TORCH_CHECK ni src/deform_conv_cuda.cpp
+replace all the occurences of .data< to .data_ptr< in src/deform_conv_cuda_kernel.cu
+
+```
+sed -i -- 's/AT_CHECK/TORCH_CHECK/g' src/deform_conv_cuda.cpp
+sed -i -- 's/.data</.data_ptr</g' src/deform_conv_cuda_kernel.cu
+```
+
+
+```
+python setup.py build_ext --inplace
+```
+
+### Run prediction:
+run scripts\aanet+_predict.sh equivalent
+```
+set CUDA_VISIBLE_DEVICES=0
+echo %CUDA_VISIBLE_DEVICES%
+
+python predict.py --data_dir demo --pretrained_aanet pretrained/aanet+_kitti15-2075aea1.pth --feature_type ganet --feature_pyramid --refinement_type hourglass --no_intermediate_supervision
+
+```
+
 
 
